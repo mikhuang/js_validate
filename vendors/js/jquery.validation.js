@@ -13,18 +13,31 @@
 (function($) {
   var options = null;
   $.fn.validate = function(rules, opts) {
-    options = $.extend({}, $.fn.validate.defaults, opts);
+    if (opts != null) {
+    	options = $.extend({}, $.fn.validate.defaults, opts);
 		
 		$.each(opts.watch, function(fieldId) {
 			$("#" + opts.watch[fieldId]).change(function() {
 				$.fn.validate.ajaxField($(this));
 			});
 		});
-
+    }
+    
     return this.each(function() {
       $this = $(this);
-      $this.submit(function() {
-        var errors = [];
+      
+      if (opts == null) {
+        return $.fn.validate.validateGo(rules);
+      } else {
+        $this.submit(function() {
+		  return $.fn.validate.validateGo(rules);
+        });
+      }
+    });
+  };
+  
+  $.fn.validate.validateGo = function(rules) {
+  		var errors = [];
         var val = null;
 				
         $.fn.validate.beforeFilter();
@@ -78,9 +91,7 @@
         }
         
         return true;
-      });
-    });
-  };
+  }
   
   $.fn.validate.validateRule = function(val, rule, negate, fieldName) {
     if(negate == undefined) {
@@ -224,7 +235,7 @@
   };
 	
   $.fn.validate.beforeFilter = function() {
-    if(options.messageId != null) {
+    if(options != null && options.messageId != null) {
       $("#" + options.messageId).html("")
                                 .slideDown();
     }
@@ -235,7 +246,7 @@
   };  
 
   $.fn.validate.afterFilter = function(errors) {
-    if(options.messageId != null) {
+    if(options != null && options.messageId != null) {
       $("#" + options.messageId).html(errors.join("<br />"))
                                 .slideDown();
     }
